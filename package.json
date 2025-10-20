@@ -1,0 +1,20 @@
+{
+  "name": "healthcare-api-assessment",
+  "version": "1.0.0",
+  "description": "**Author:** Alexia Valenzuela   **Tech Stack:** Node.js, Axios, JavaScript   **Focus:** API Integration, Data Validation, Risk Scoring, and Automated Reporting",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexiaValen/Healthcare-API-Assessment.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alexiaValen/Healthcare-API-Assessment/issues"
+  },
+  "homepage": "https://github.com/alexiaValen/Healthcare-API-Assessment#readme"
+}

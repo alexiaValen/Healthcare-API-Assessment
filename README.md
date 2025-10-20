@@ -21,6 +21,19 @@ The script connects to the **DemoMed Healthcare API**, retrieves paginated patie
 ---
 
 ## ⚙️ Setup Instructions
+1. Fetch all patient pages from
+https://assessment.ksensetech.com/api/patients?page=1&limit=5
+using your API key.
+2. Handle rate limits (429) and random 500/503 errors with retry logic.
+3. Parse blood pressure, temperature, and age for each patient.
+4. Compute total risk score:
+- Blood Pressure (1–4 pts)
+- Temperature (0–2 pts)
+- Age (1–2 pts)
+5.	Build 3 lists:
+-high_risk_patients → total score ≥ 4
+-fever_patients → temperature ≥ 99.6°F
+-data_quality_issues → invalid/missing BP, Temp, or Age
 
 ### 1. Clone the repository
 ```bash
