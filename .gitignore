@@ -4,4 +4,7 @@ npm-debug.log*
 .env
 build/
 dist/
-KSENSE_API_KEY=ak_ae9bada5eddc34ceb2cd19a39c4c32c02cd75568f37c6885
+.DS_Store
+.vscode/
+.idea/
+coverage/

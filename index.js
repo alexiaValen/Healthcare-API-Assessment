@@ -51,6 +51,9 @@ async function fetchOnePage(page = 1, limit = 5) {
   }
 })();
 
+//test log to veriy api key is loaded
+console.log("Loaded API Key:", API_KEY ? "✅ Found" : "❌ Missing");
+
 // DEFINE parseBloodPressure(bp):
 //     IF bp is null OR empty OR not in "number/number" format → RETURN null
 //     SPLIT bp into SYSTOLIC and DIASTOLIC as numbers

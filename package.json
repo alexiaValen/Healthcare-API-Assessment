@@ -2,6 +2,7 @@
   "name": "healthcare-api-assessment",
   "version": "1.0.0",
   "description": "**Author:** Alexia Valenzuela   **Tech Stack:** Node.js, Axios, JavaScript   **Focus:** API Integration, Data Validation, Risk Scoring, and Automated Reporting",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
