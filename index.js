@@ -1,10 +1,13 @@
 // BEGIN PROGRAM
+import "dotenv/config";
+import axios from "axios";
 
-// SET API_KEY to your unique Ksense key
-// SET BASE_URL to "https://assessment.ksensetech.com/api"
+const API_KEY = process.env.KSENSE_API_KEY
+const BASE_URL = "https://assessment.ksensetech.com/api";
 
 // DEFINE delay(ms):
 //     WAIT for ms milliseconds
+// Utility to pause between retries
 
 // DEFINE fetchPatients():
 //     INITIALIZE empty list ALL_PATIENTS
@@ -31,7 +34,22 @@
 //     END WHILE
 
 //     RETURN ALL_PATIENTS
+async function fetchOnePage(page = 1, limit = 5) {
+  const res = await axios.get(`${BASE_URL}/patients?page=${page}&limit=${limit}`, {
+    headers: { "x-api-key": API_KEY },
+  });
+  return res.data;
+}
 
+(async () => {
+  try {
+    const data = await fetchOnePage(1);
+    console.log("Sample page keys:", Object.keys(data));
+    console.log("First patient sample:", data.data?.[0]);
+  } catch (err) {
+    console.error("Fetch failed:", err.message);
+  }
+})();
 
 // DEFINE parseBloodPressure(bp):
 //     IF bp is null OR empty OR not in "number/number" format → RETURN null
