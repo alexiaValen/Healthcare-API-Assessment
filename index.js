@@ -244,7 +244,25 @@ console.log("Quality Issues:", results.qualityIssues); // expect ["4"]
 //   SEND POST request to BASE_URL + "/submit-assessment"
 //       with headers { "x-api-key": API_KEY, "Content-Type": "application/json" }
 //   LOG response or handle error
+async function submitResults({ highRisk, fever, qualityIssues }) {
+  const payload = {
+    high_risk_patients: highRisk,
+    fever_patients: fever,
+    data_quality_issues: qualityIssues,
+  };
 
+  const res = await axios.post(`${BASE_URL}/submit-assessment`, payload, {
+    headers: {
+      "x-api-key": API_KEY,
+      "Content-Type": "application/json",
+    },
+  });
+  return res.data;
+}
+
+// test call (using real results gathered)
+const response = await submitResults(demoRes);
+console.log("Submission response:", response);
 
 // MAIN EXECUTION:
 //   PRINT "Fetching patients..."
