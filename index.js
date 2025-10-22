@@ -197,7 +197,42 @@ console.log(ageRisk("70")); // 2
 //       IF temperature ≥ 99.6°F:
 //           ADD PATIENT.patient_id to FEVER
 //   RETURN { HIGH_RISK, FEVER, QUALITY_ISSUES }
+function evaluatePatients(patients) {
+  const highRisk = [];
+  const fever = [];
+  const qualityIssues = [];
 
+  for (const p of patients) {
+    const bpScore = parseBloodPressure(p.blood_pressure);
+    const tempScore = temperatureRisk(p.temperature);
+    const ageScore = ageRisk(p.age);
+
+    if (bpScore === null || tempScore === null || ageScore === null) {
+      qualityIssues.push(p.patient_id);
+    }
+
+    const total = (bpScore || 0) + (tempScore || 0) + (ageScore || 0);
+    if (total >= 4) highRisk.push(p.patient_id);
+
+    if (!Number.isNaN(Number(p.temperature)) && Number(p.temperature) >= 99.6) {
+      fever.push(p.patient_id);
+    }
+  }
+
+  return { highRisk, fever, qualityIssues };
+}
+//test
+const testPatients = [
+  { patient_id: "1", blood_pressure: "140/90", temperature: "101.0", age: "70" }, // high risk
+  { patient_id: "2", blood_pressure: "120/80", temperature: "99.0", age: "30" },  // not high risk
+  { patient_id: "3", blood_pressure: "130/85", temperature: "100.0", age: "50" }, // not high risk
+  { patient_id: "4", blood_pressure: "invalid", temperature: "98.6", age: "40" }, // quality issue
+];
+
+const results = evaluatePatients(testPatients);
+console.log("High Risk:", results.highRisk); // expect ["1"]
+console.log("Fever:", results.fever); // expect ["1","3"]
+console.log("Quality Issues:", results.qualityIssues); // expect ["4"]              
 
 // DEFINE submitResults(results):
 //   CREATE JSON payload:
