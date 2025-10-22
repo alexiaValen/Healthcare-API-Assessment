@@ -128,6 +128,18 @@ async function fetchAllPatients(limit = 5) {
 //       Stage 2 (≥140 or ≥90) → 4
 //   RETURN score
 
+function parseBloodPressure(bp) {
+  if (!bp || typeof bp !== "string" || !bp.includes("/")) return null;
+  const [sStr, dStr] = bp.split("/");
+  const s = Number(sStr);
+  const d = Number(dStr);
+  if (Number.isNaN(s) || Number.isNaN(d)) return null;
+  if (s < 120 && d < 80) return 1;
+  if (s >= 120 && s <= 129 && d < 80) return 2;
+  if ((s >= 130 && s <= 139) || (d >= 80 && d <= 89)) return 3;
+  if (s >= 140 || d >= 90) return 4;
+  return 0;
+}
 
 // DEFINE temperatureRisk(temp):
 //   CONVERT temp to number
@@ -137,6 +149,14 @@ async function fetchAllPatients(limit = 5) {
 //   ELSE IF ≥101.0 → 2
 //   RETURN score
 
+function temperatureRisk(temp) {
+  const t = Number(temp);
+  if (Number.isNaN(t)) return null;
+  if (t <= 99.5) return 0;
+  if (t <= 100.9) return 1;
+  if (t >= 101.0) return 2;
+  return 0;
+}
 
 // DEFINE ageRisk(age):
 //   CONVERT age to number
@@ -146,6 +166,17 @@ async function fetchAllPatients(limit = 5) {
 //   ELSE IF <40 → 1
 //   RETURN score
 
+function ageRisk(age) {
+  const a = Number(age);
+  if (Number.isNaN(a)) return null;
+  if (a > 65) return 2;
+  return 1; // both <40 and 40-65 => 1
+}
+
+console.log(parseBloodPressure("120/80")); // expect 3 (Stage1 since diastolic 80)
+console.log(parseBloodPressure("118/78")); // 1
+console.log(temperatureRisk("100.0")); // 1
+console.log(ageRisk("70")); // 2
 
 // DEFINE evaluatePatients(patientList):
 //   INITIALIZE empty arrays HIGH_RISK, FEVER, QUALITY_ISSUES
