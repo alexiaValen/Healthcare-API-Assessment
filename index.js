@@ -66,56 +66,97 @@ async function fetchOnePage(page = 1, limit = 5) {
 // ==========================================================
 //  PSEUDOCODE — FUTURE STEPS (LOGIC OUTLINE)
 // ==========================================================
-
-
-// DEFINE fetchPatients():
-//   INITIALIZE empty list ALL_PATIENTS
-//   SET PAGE = 1
-//   SET HAS_NEXT = true
-
-//   WHILE HAS_NEXT IS TRUE:
-//       TRY:
-//           SEND GET request to BASE_URL + "/patients?page=PAGE&limit=5"
-//               with header { "x-api-key": API_KEY }
-//           PARSE response JSON into DATA
-//           ADD DATA.data (patient list) to ALL_PATIENTS
-//           UPDATE HAS_NEXT using DATA.pagination.hasNext
-//           INCREMENT PAGE by 1
-//       CATCH error:
-//           IF error status is 429 OR 500 OR 503:
-//               PRINT "Retrying..."
-//               WAIT 1 second
-//           ELSE:
-//               PRINT "Failed request", stop fetching
-//               SET HAS_NEXT to FALSE
-//   RETURN ALL_PATIENTS
-
-async function fetchAllPatients(limit = 5) {
+// SAFER FETCH FUNCTION
+async function fetchPatients(limit = 5) {
+  console.log("📦 Starting patient data fetch...");
+  let allPatients = [];
   let page = 1;
-  let all = [];
   let hasNext = true;
 
   while (hasNext) {
-    const data = await fetchWithRetry(`${BASE_URL}/patients?page=${page}&limit=${limit}`, {
-      headers: { "x-api-key": API_KEY },
-    });
-    all.push(...(data.data || []));
-    hasNext = data.pagination?.hasNext ?? false;
-    page += 1;
+    try {
+      console.log(`🔹 Fetching page ${page}...`);
+      const data = await fetchWithRetry(`${BASE_URL}/patients?page=${page}&limit=${limit}`, {
+        headers: { "x-api-key": API_KEY },
+      });
+
+      allPatients = [...allPatients, ...data.data];
+
+      hasNext = data.pagination?.hasNext ?? false;
+      console.log(`✅ Page ${page} fetched (${data.data.length} patients)`);
+
+      // Respectful delay before next request
+      if (hasNext) {
+        console.log("⏳ Waiting 2 seconds before next page...");
+        await delay(2000);
+      }
+
+      page++;
+
+    } catch (err) {
+      const status = err.response?.status;
+      if ([429, 500, 503].includes(status)) {
+        console.warn(`⚠️ Rate limit or server issue (status ${status}). Retrying in 5s...`);
+        await delay(5000);
+      } else {
+        console.error("❌ Fatal fetch error:", err.message);
+        break;
+      }
+    }
   }
-  return all;
+
+  console.log(`🏁 Done! Total patients fetched: ${allPatients.length}`);
+  return allPatients;
 }
 
-// test
-(async () => {
-  try {
-    const patients = await fetchAllPatients(5);
-    console.log("Total patients fetched:", patients.length);
-    console.log("IDs:", patients.slice(0,10).map(p => p.patient_id));
-  } catch (err) {
-    console.error(err.message);
-  }
-})();
+// // DEFINE fetchPatients():
+// //   INITIALIZE empty list ALL_PATIENTS
+// //   SET PAGE = 1
+// //   SET HAS_NEXT = true
+
+// //   WHILE HAS_NEXT IS TRUE:
+// //       TRY:
+// //           SEND GET request to BASE_URL + "/patients?page=PAGE&limit=5"
+// //               with header { "x-api-key": API_KEY }
+// //           PARSE response JSON into DATA
+// //           ADD DATA.data (patient list) to ALL_PATIENTS
+// //           UPDATE HAS_NEXT using DATA.pagination.hasNext
+// //           INCREMENT PAGE by 1
+// //       CATCH error:
+// //           IF error status is 429 OR 500 OR 503:
+// //               PRINT "Retrying..."
+// //               WAIT 1 second
+// //           ELSE:
+// //               PRINT "Failed request", stop fetching
+// //               SET HAS_NEXT to FALSE
+// //   RETURN ALL_PATIENTS
+
+// async function fetchAllPatients(limit = 5) {
+//   let page = 1;
+//   let all = [];
+//   let hasNext = true;
+
+//   while (hasNext) {
+//     const data = await fetchWithRetry(`${BASE_URL}/patients?page=${page}&limit=${limit}`, {
+//       headers: { "x-api-key": API_KEY },
+//     });
+//     all.push(...(data.data || []));
+//     hasNext = data.pagination?.hasNext ?? false;
+//     page += 1;
+//   }
+//   return all;
+// }
+
+// // test
+// (async () => {
+//   try {
+//     const patients = await fetchAllPatients(5);
+//     console.log("Total patients fetched:", patients.length);
+//     console.log("IDs:", patients.slice(0,10).map(p => p.patient_id));
+//   } catch (err) {
+//     console.error(err.message);
+//   }
+// })();
 
 // DEFINE parseBloodPressure(bp):
 //   IF bp is null OR empty OR not in "number/number" format → RETURN null
@@ -261,7 +302,7 @@ async function submitResults({ highRisk, fever, qualityIssues }) {
 }
 
 // test call (using real results gathered)
-const response = await submitResults(demoRes);
+const response = await submitResults(results);
 console.log("Submission response:", response);
 
 // MAIN EXECUTION:
@@ -275,5 +316,27 @@ console.log("Submission response:", response);
 //   PRINT "Submitting results..."
 //   CALL submitResults(RESULTS)
 // */
+async function main() {
+  console.log("Fetching patients...");
+  const patients = await fetchPatients(5);  // <-- updated function name
+  console.log("Fetched:", patients.length);
+
+  console.log("Evaluating...");
+  const results = evaluatePatients(patients);
+
+  console.log("Submitting results...");
+  const feedback = await submitResults({
+    highRisk: results.highRisk,
+    fever: results.fever,
+    qualityIssues: results.qualityIssues,
+  });
+
+  console.log("Server response:", feedback);
+}
+
+main().catch((e) => {
+  console.error("Fatal error:", e.message);
+  process.exit(1);
+});
 
 // // END PROGRAM
